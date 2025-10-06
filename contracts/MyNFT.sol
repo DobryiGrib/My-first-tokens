@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MyERC721Token is ERC721, Ownable{
 
-    uint256 private _nextTokenId = 1;
+    uint256 internal _nextTokenId = 1;
 
     constructor() ERC721("First Token", "FTK") Ownable(msg.sender) {}
 
