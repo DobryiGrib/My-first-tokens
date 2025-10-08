@@ -1,5 +1,8 @@
 pragma solidity ^0.8.30;
 
+import "@openzeppelin/contracts/token/ERC721/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 contract MyERC20Token{
 
     string public name = "My Token";
@@ -18,22 +21,23 @@ contract MyERC20Token{
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    function transfer(address _to, uint256 _amount) public {
+    function transfer(address _to, uint256 _amount) public returns(bool) {
         require(_amount > uint256(0), "there are no amount");
         require(_to != address(0), "can't transfer to zero address");
         require(balanceOf[msg.sender] >= _amount, "Insufficient balance");
         balanceOf[msg.sender] -= _amount;
         balanceOf[_to] += _amount;
         emit Transfer(msg.sender, _to, _amount);
+        return true;
     }
-
-    function approve(address _spender, uint256 _amount) external {
-         require(_amount == 0 || allowedAddress[msg.sender][_spender] == 0, "Set allowance to zero first"); 
+    
+    function approve(address _spender, uint256 _amount) external returns(bool) {
         allowedAddress[msg.sender][_spender] = _amount;
         emit Approval(msg.sender, _spender, _amount);
+        return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 _amount) external {
+    function transferFrom(address _from, address _to, uint256 _amount) external returns(bool) {
          require(_to != address(0), "can't transfer to zero address");
         require(balanceOf[_from] >= _amount, "Insufficient balance");
         require(allowedAddress[_from][msg.sender] >= _amount, "Error on allowedAddress");
@@ -42,8 +46,15 @@ contract MyERC20Token{
         allowedAddress[_from][msg.sender] -= _amount;
 
         emit Transfer(_from, _to, _amount);
+        return true;
 
     }
 
 
+}
+
+contract PausableToken is Ownable, ERC20{
+    constructor(string name, string symbol, uint256 initialSupply) ERC20("My Token", "MTK") Ownable(msg.sender) {
+
+    }
 }
