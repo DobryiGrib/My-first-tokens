@@ -38,7 +38,6 @@ describe("MyERC20Token ERC-20", function () {
     await token.connect(addr1).transfer(owner.address, 1n);
   } catch (error) {
     errorThrown = true;
-    // Проверяем что ошибка связана с revert
     expect(error.message).to.include("reverted");
     expect(error.message).to.include("Insufficient balance");
   }
