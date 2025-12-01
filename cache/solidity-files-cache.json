@@ -688,8 +688,8 @@
       ]
     },
     "C:\\Users\\Рамазан\\OneDrive\\Рабочий стол\\My-first-tokens\\contracts\\cryptoBank.sol": {
-      "lastModificationDate": 1764338242841,
-      "contentHash": "8fced8d76cd4774aa37414b79a6cb50c",
+      "lastModificationDate": 1764618284378,
+      "contentHash": "b074650a09072546d91566ec6aaf4e68",
       "sourceName": "contracts/cryptoBank.sol",
       "solcConfig": {
         "version": "0.8.30",

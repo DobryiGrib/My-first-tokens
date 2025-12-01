@@ -293,5 +293,47 @@ describe("cryptoBank", function(){
         expect(await bank.balanceOfBank()).to.equal(ethers.parseEther("100"))
     })
 
+    //must show to the owner - total balance of excess money
+    it("must show to the owner - total balance of excess money", async function(){
+        const [owner, user] = await ethers.getSigners();
+        await bank.connect(user).deposit({value: ethers.parseEther("1")})
+        await user.sendTransaction({
+        to: bank.target,
+        value: ethers.parseEther("2")
+    });
+        expect(await bank.connect(owner).balanceOfExcess()).to.equal(ethers.parseEther("2"));
+    })
+
+    //it must transfer excess money to owner
+    it("it must transfer excess money to owner", async function () {
+        const [owner, user1, user2] = await ethers.getSigners();
+        await bank.connect(user1).deposit({value: ethers.parseEther("5")})
+        await user2.sendTransaction({
+            to: bank.target,
+            value: ethers.parseEther("0.5")
+        })
+        const ownerBalanceBefore = await ethers.provider.getBalance(owner.address);
+        await bank.connect(owner).mintExcess();
+        const ownerBalanceAfter = await ethers.provider.getBalance(owner.address);
+        expect(await bank.connect(owner).balanceOfExcess()).to.equal(0n)
+        expect(ownerBalanceAfter > ownerBalanceBefore).to.be.equal(true)
+    })
+
+    //it must reject if excess balance is zero
+     it("it must reject if excess balance is zero", async function () {
+        let errorCaught = false
+        const [owner, user1] = await ethers.getSigners();
+        await bank.connect(user1).deposit({value: ethers.parseEther("5")})
+        try{
+            await bank.connect(owner).mintExcess();
+        }catch(error){
+            errorCaught = true;
+            expect(error.message).to.include("revert")
+            expect(error.message).to.include("no excess ETH")
+        }
+        expect(errorCaught).to.equal(true);
+        
+    })
+
 })
 

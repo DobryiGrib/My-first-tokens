@@ -1,25 +1,31 @@
 pragma solidity ^0.8.30;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract CryptoBank is Ownable{
+contract CryptoBank is Ownable, ReentrancyGuard{
     constructor() Ownable(msg.sender) {}
 
+     uint256 private totalDeposit ;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
+    receive() external payable {}
+
     function deposit() public payable{
         require(msg.value > 0, "can't deposit zero");
         balanceOf[msg.sender] += msg.value;
+        totalDeposit += msg.value;
         emit Transfer(msg.sender, address(this), msg.value);
     }
 
-    function withdraw(uint256 _amount) public {
+    function withdraw(uint256 _amount) public nonReentrant{
         require(balanceOf[msg.sender] >= _amount, "user doesn't have enough money");
         balanceOf[msg.sender] -= _amount;
+        totalDeposit -= _amount;
         (bool success, ) = msg.sender.call{value: _amount}("");
         require(success, "ETH transfer failed");
         emit Transfer(address(this), msg.sender, _amount);
@@ -67,6 +73,20 @@ contract CryptoBank is Ownable{
     function balanceOfBank() public view returns(uint256){
         return address(this).balance;
     }
+
+    function balanceOfExcess() external view onlyOwner returns(uint256){
+        return address(this).balance - totalDeposit;
+    }
+
+
+    function mintExcess() external onlyOwner nonReentrant {
+        uint256 excess = address(this).balance - totalDeposit;
+        require(excess > 0, "no excess ETH");
+        (bool success, ) = msg.sender.call{value: excess}("");
+        require(success, "ETH transfer failed");
+    }
+
+    
 
 
 
